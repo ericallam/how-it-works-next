@@ -16,14 +16,14 @@ const s3Client = new S3Client({
 });
 
 export const convertVideo = task({
-  id: "convert-video",
+  id: "convert-video-all",
   retry: {
     maxAttempts: 5,
     minTimeoutInMs: 1000,
     maxTimeoutInMs: 10000,
     factor: 2,
   },
-  run: async ({ videoId }: { videoId: string }) => {
+  run: async ({ videoId }: { videoId: string }, { ctx }) => {
     const { url, userId } = await getVideo(videoId);
 
     const outputPath = path.join("/tmp", `output_${videoId}.mp4`);
