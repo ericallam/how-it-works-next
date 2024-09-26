@@ -1,4 +1,4 @@
-import { logger, task, metadata } from "@trigger.dev/sdk/v3";
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { updateVideoUrl } from "../db.js";
 import ffmpeg from "fluent-ffmpeg";
 import { Readable } from "node:stream";
@@ -26,15 +26,15 @@ export const convertVideo = task({
   run: async ({ videoId }: { videoId: string }) => {
     const { url, userId } = await getVideo(videoId);
 
-    await metadata.set("videoUrl", url);
+    // await metadata.set("videoUrl", url);
 
     const outputPath = path.join("/tmp", `output_${videoId}.mp4`);
 
-    await metadata.set("state", { name: "fetching-video", progress: 0.1 });
+    // await metadata.set("state", { name: "fetching-video", progress: 0.1 });
 
     const response = await fetch(url);
 
-    await metadata.set("state", { name: "converting-ffmpeg", progress: 0.2 });
+    // await metadata.set("state", { name: "converting-ffmpeg", progress: 0.2 });
 
     await new Promise((resolve, reject) => {
       ffmpeg(Readable.fromWeb(response.body as ReadableStream))
@@ -45,7 +45,7 @@ export const convertVideo = task({
         .run();
     });
 
-    await metadata.set("state", { name: "uploading-r2", progress: 0.5 });
+    // await metadata.set("state", { name: "uploading-r2", progress: 0.5 });
 
     const processedContent = await fs.readFile(outputPath);
 
@@ -61,15 +61,15 @@ export const convertVideo = task({
     await s3Client.send(new PutObjectCommand(uploadParams));
     const s3Url = `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${s3Key}`;
 
-    await metadata.set("processedVideoUrl", s3Url);
-    await metadata.set("state", { name: "updating-video-url", progress: 0.7 });
+    // await metadata.set("processedVideoUrl", s3Url);
+    // await metadata.set("state", { name: "updating-video-url", progress: 0.7 });
 
     logger.info("Video converted", { videoId, s3Url });
 
     // Update database
     await updateVideoUrl(videoId, s3Url);
 
-    await metadata.set("state", { name: "sending-email", progress: 0.9 });
+    // await metadata.set("state", { name: "sending-email", progress: 0.9 });
 
     await sendEmail(
       userId,
@@ -77,7 +77,7 @@ export const convertVideo = task({
       `Your video has been processed and is available at: ${s3Url}`
     );
 
-    await metadata.set("state", { name: "done", progress: 1 });
+    // await metadata.set("state", { name: "done", progress: 1 });
 
     return { success: true, s3Url };
   },
