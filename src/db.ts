@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+export { UserSchema } from "../prisma/generated/zod";
 
 export const prisma = new PrismaClient();
 

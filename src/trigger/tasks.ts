@@ -6,7 +6,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { sendEmail } from "../email.js";
-import { getVideo } from "../db.js";
+import { getVideo, UserSchema } from "../db.js";
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -17,6 +17,8 @@ const s3Client = new S3Client({
 export const processVideo = task({
   id: "process-video",
   run: async ({ videoId }: { videoId: string }) => {
+    UserSchema.safeParse({ videoId });
+
     const { url } = await getVideo(videoId);
 
     const outputPath = path.join("/tmp", `output_${videoId}.mp4`);
